@@ -167,6 +167,7 @@ def make_sync_client_factory() -> Tuple[Callable[..., Any], Dict[str, Any]]:
         captured.update(kwargs)
         session = MagicMock()
         session.headers = {}
+        captured["session"] = session
         return session
 
     return factory, captured
@@ -191,6 +192,7 @@ def test_fastapi_uses_http_limits_from_settings() -> None:
             api = FastAPI(system)
 
     api.stop()
+    captured["session"].close.assert_called_once_with()
     limits = captured["limits"]
     assert limits.keepalive_expiry == 12.5
     assert limits.max_connections == 64
